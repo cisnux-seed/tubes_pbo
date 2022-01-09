@@ -1,0 +1,10 @@
+{
+    "python.formatting.provider": "autopep8",
+    "python.linting.pylintEnabled": false,
+    "python.linting.enabled": false,
+    "python.linting.flake8Enabled": false,
+    "python.linting.pycodestyleEnabled": true,
+    "python.linting.pydocstyleEnabled": false,
+    "python.linting.pylamaEnabled": false,
+    "python.linting.prospectorEnabled": false
+}
