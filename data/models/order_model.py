@@ -5,11 +5,11 @@ from data.models.food_model import FoodModel
 @dataclass
 class OrderModel:
     id: str
-    user_id: str | None
-    food_id: int | None
-    order_quantity: int | None
-    already_paid: bool | None
-    food: FoodModel | None
+    user_id: str
+    food_id: int
+    order_quantity: int
+    already_paid: bool
+    food: FoodModel
 
     def from_dict(data):
         return OrderModel(
