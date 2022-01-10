@@ -23,7 +23,7 @@ class CustomerHomePage:
 
     def draw_home_page(self):
         self.__tk.geometry('400x150')
-        self.__tk.title('Dashboard')
+        self.__tk.title('Home Page')
 
         Button(self.__tk,
                text="Pilih Menu",

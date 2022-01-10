@@ -23,7 +23,7 @@ class AdminHomePage:
         self.__table.bind("<<TreeviewSelect>>", self.__on_tree_select)
 
     def draw_home_page(self):
-        self.__tk.title('Foods')
+        self.__tk.title('Home Page')
         self.__tk.geometry('1270x720')
 
         self.__draw_table(self.__foods)
@@ -100,7 +100,7 @@ class AddFoodPage:
 
     def draw_add_food(self):
         self.__tk.geometry('400x150')
-        self.__tk.title('Food')
+        self.__tk.title('Foods')
 
         Label(
             self.__tk, text="Name", justify=LEFT).grid(row=0, column=0)
@@ -138,7 +138,7 @@ class UpdateFoodPage:
 
     def draw_update_food(self):
         self.__tk.geometry('400x150')
-        self.__tk.title('Food')
+        self.__tk.title('Foods')
 
         if self.__food is not None:
             Label(
