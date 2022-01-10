@@ -119,7 +119,7 @@ class FoodMenu:
 
     def __add_to_cart(self, quantity_order):
         if self.__food is not None:
-            if quantity_order.get() < self.__food.food_quantity and self.__food.food_quantity != 0:
+            if quantity_order.get() < self.__food.food_quantity and quantity_order.get() != 0 and self.__food.food_quantity != 0:
                 order = OrderModel(generate_uuid(), self.user_id,
                                    self.__food.id, quantity_order.get(), int(False), None)
                 self.__food.food_quantity -= quantity_order.get()
