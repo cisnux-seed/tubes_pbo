@@ -42,7 +42,7 @@ class CustomerHomePage:
 
 class FoodMenu:
     def __init__(self, user_id):
-        self.__food = None
+        self.__food_index = None
         self.user_id = user_id
         self.__db_helper = DatabaseHelper().get_instance()
         self.__foods = self.__db_helper.fetch_foods()
@@ -76,12 +76,11 @@ class FoodMenu:
         self.__tk.mainloop()
 
     def __draw_table(self, foods):
-        self.__table['columns'] = ('no', 'food_id', 'food_name',
+        self.__table['columns'] = ('no', 'food_name',
                                    'food_quantity', 'food_price', 'stock')
 
         self.__table.column("#0", width=0,  stretch=NO)
         self.__table.column("no", anchor=CENTER, width=120)
-        self.__table.column("food_id", anchor=CENTER, width=120)
         self.__table.column("food_name", anchor=CENTER, width=120)
         self.__table.column("food_quantity", anchor=CENTER, width=120)
         self.__table.column("food_price", anchor=CENTER, width=120)
@@ -89,18 +88,16 @@ class FoodMenu:
 
         self.__table.heading("#0", text="", anchor=CENTER)
         self.__table.heading("no", text="No", anchor=CENTER)
-        self.__table.heading("food_id", text="Id", anchor=CENTER)
         self.__table.heading("food_name", text="Name", anchor=CENTER)
         self.__table.heading("food_quantity", text="Quantity", anchor=CENTER)
         self.__table.heading("food_price", text="Price", anchor=CENTER)
         self.__table.heading("stock", text="Stock", anchor=CENTER)
 
-        index = 0
+        no = 1
         for food in foods:
-            self.__table.insert(parent='', index='end', iid=index, text='',
+            self.__table.insert(parent='', index='end',
                                 values=(
-                                    index+1,
-                                    food.id,
+                                    no,
                                     food.name,
                                     food.food_quantity,
                                     food.price,
@@ -108,22 +105,23 @@ class FoodMenu:
                                 )
                                 )
 
-            index += 1
+            no += 1
         self.__table.pack()
 
     def __on_tree_select(self, event):
         for item in self.__table.selection():
             item_value = self.__table.item(item, "values")
-        self.__food = FoodModel(
-            item_value[1], item_value[2], int(item_value[3]), int(item_value[4]))
+        # should be convert to int because item_value return a string
+        self.__food_index = int(item_value[0])-1
 
     def __add_to_cart(self, quantity_order):
-        if self.__food is not None:
-            if quantity_order.get() < self.__food.food_quantity and quantity_order.get() != 0 and self.__food.food_quantity != 0:
+        if self.__food_index is not None:
+            if quantity_order.get() < self.__foods[self.__food_index].food_quantity and quantity_order.get() != 0 and self.__foods[self.__food_index].food_quantity != 0:
                 order = OrderModel(generate_uuid(), self.user_id,
-                                   self.__food.id, quantity_order.get(), int(False), None)
-                self.__food.food_quantity -= quantity_order.get()
-                self.__db_helper.order_food(order, self.__food)
+                                   self.__foods[self.__food_index].id, quantity_order.get(), int(False), None)
+                self.__foods[self.__food_index].food_quantity -= quantity_order.get()
+                self.__db_helper.order_food(
+                    order, self.__foods[self.__food_index])
                 self.__tk.destroy()
                 FoodMenu(self.user_id).draw_menu()
 
@@ -135,7 +133,7 @@ class FoodMenu:
 class BillMenu:
     def __init__(self, user_id):
         self.user_id = user_id
-        self.__order = None
+        self.__order_index = None
         self.__db_helper = DatabaseHelper().get_instance()
         self.__orders = self.__db_helper.fetch_order_datail(self.user_id)
         self.__total_bill = self.__db_helper.fetch_total_bill(self.user_id)
@@ -157,14 +155,14 @@ class BillMenu:
         self.__draw_table(self.__orders)
 
         Label(
-            self.__tk, text="Tagihan :", justify=LEFT).place(
+            self.__tk, text="Total Tagihan :", justify=LEFT).place(
             relx=0.35, rely=0.4, anchor=CENTER)
         Label(
             self.__tk, text=f"Rp. {self.__total_bill if self.__total_bill != None else 0},-", justify=LEFT).place(
             relx=0.42, rely=0.4, anchor=CENTER)
 
         Label(
-            self.__tk, text="Uang Customer :", justify=LEFT).place(
+            self.__tk, text="Masukkan Uang :", justify=LEFT).place(
             relx=0.35, rely=0.43, anchor=CENTER)
         user_money = IntVar()
         Entry(self.__tk, textvariable=user_money).place(
@@ -182,63 +180,42 @@ class BillMenu:
     def __draw_table(self, orders):
         self.__table['columns'] = (
             'no',
-            'order_id',
-            'food_id',
             'food_name',
             'food_price',
-            'order_quantity',
-            'food_quantity',
-            'already_paid'
+            'order_quantity'
         )
 
         self.__table.column("#0", width=0,  stretch=NO)
         self.__table.column("no", anchor=CENTER, width=120)
-        self.__table.column("order_id", anchor=CENTER, width=120)
-        self.__table.column("food_id", anchor=CENTER, width=120)
         self.__table.column("food_name", anchor=CENTER, width=120)
         self.__table.column("food_price", anchor=CENTER, width=120)
         self.__table.column("order_quantity", anchor=CENTER, width=120)
-        self.__table.column("food_quantity", anchor=CENTER, width=120)
-        self.__table.column("already_paid", anchor=CENTER, width=120)
 
         self.__table.heading("#0", text="", anchor=CENTER)
         self.__table.heading("no", text="No", anchor=CENTER)
-        self.__table.heading("order_id", text="Order Id", anchor=CENTER)
-        self.__table.heading("food_id", text="Food Id", anchor=CENTER)
         self.__table.heading("food_name", text="Food Name", anchor=CENTER)
         self.__table.heading("food_price", text="Price", anchor=CENTER)
         self.__table.heading(
             "order_quantity", text="Order Quantity", anchor=CENTER)
-        self.__table.heading(
-            "food_quantity", text="Food Quantity", anchor=CENTER)
-        self.__table.heading(
-            "already_paid", text="Already Paid", anchor=CENTER)
 
-        index = 0
+        no = 1
         for order in orders:
-            self.__table.insert(parent='', index='end', iid=index, text='',
+            self.__table.insert(parent='', index='end',
                                 values=(
-                                    index+1,
-                                    order.id,
-                                    order.food_id,
+                                    no,
                                     order.food.name,
                                     order.food.price,
-                                    order.order_quantity,
-                                    order.food.food_quantity,
-                                    order.already_paid
+                                    order.order_quantity
                                 )
                                 )
-
-            index += 1
+            no += 1
         self.__table.pack()
 
     def __on_tree_select(self, event):
         for item in self.__table.selection():
             item_value = self.__table.item(item, "values")
-        self.__order = OrderModel(
-            item_value[1], None, None, item_value[5], None,
-            FoodModel(item_value[2], None, item_value[6], None)
-        )
+        # should be convert to int because item_value return a string
+        self.__order_index = int(item_value[0])-1
 
     def __pay_bills(self, user_money):
         if self.__total_bill != None:
@@ -259,9 +236,8 @@ class BillMenu:
         CustomerHomePage(self.user_id).draw_home_page()
 
     def __delete(self):
-        if self.__order != None:
-            self.__order.food.food_quantity = int(
-                self.__order.food.food_quantity) + int(self.__order.order_quantity)
-            self.__db_helper.remove_order(self.__order)
+        if self.__order_index != None:
+            self.__orders[self.__order_index].food.food_quantity += self.__orders[self.__order_index].order_quantity
+            self.__db_helper.remove_order(self.__orders[self.__order_index])
             self.__tk.destroy()
             BillMenu(self.user_id).draw_bill_menu()

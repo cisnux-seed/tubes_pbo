@@ -18,5 +18,5 @@ class OrderModel:
             data['food_id'],
             data['order_quantity'],
             bool(data['already_paid']),
-            FoodModel.from_dict(data)
+            FoodModel.from_order_dict(data)
         )
